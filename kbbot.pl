@@ -70,11 +70,11 @@ sub get_kills {
 	$response = $response->decoded_content( charset => 'none', raise_error => 0 );
 	$response = decode_json($response);
 	print Dumper $response if $opt{'d'};
-	if ( $#{$response} <= 0 ) {
+	if ( scalar(@{$response}) <= 0 ) {
 		print "No new kills found.\n" if $opt{'v'};
 		exit();
 	} else {
-		print "I got back $#{$response} results from zkb\n" if $opt{'v'};
+		print "I got back " . scalar(@{$response}) . " results from zkb\n" if $opt{'v'};
 		return($response);
 	}
 }
@@ -108,7 +108,7 @@ sub generate {
 		}
 		push(@ids, $kill->{'killID'});
 	}
-	if ( $#ids <= 0 ) {
+	if ( scalar(@ids) <= 0 ) {
 		print "No kills to report.\n" if $opt{'v'};
 		exit();
 	} else {
