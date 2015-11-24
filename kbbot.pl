@@ -99,7 +99,7 @@ sub generate {
 			$text .= 'Ship: ' . get_ship($kill->{'victim'}->{'shipTypeID'}) . "\n";
 			foreach my $attacker ( @{$kill->{'attackers'}} ) {
 				if ( $attacker->{'finalBlow'} ) {
-					$text .= 'Killing Blow: ' . $attacker->{'characterName'} . ' - ' . $attacker->{'corporationName'} . ' - ' . $kill->{'victim'}->{'allianceName'} . "\n";
+					$text .= 'Killing Blow: ' . $attacker->{'characterName'} . ' - ' . $attacker->{'corporationName'} . ' - ' . $attacker->{'allianceName'} . "\n";
 					last;
 				}
 			}
