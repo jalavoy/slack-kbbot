@@ -34,7 +34,7 @@ main();
 sub main {
 	my $last_seen = get_last();
 	my $data = get_kills($last_seen);
-	my ( $message, $ids ) = generate($data);
+	my ( $message, $ids ) = generate($data, $last_seen);
 	tell_slack($message);
 	cleanup($ids);
 }
@@ -78,23 +78,31 @@ sub get_kills {
 
 sub generate {
 	my $data = shift;
+	my $last_seen = shift;
+	my $text;
 	print "Parsing data.\n" if $opt{'v'};
-	my $text = "The following kill(s) have been recorded in the last hour:\n";
+	if ( $last_seen ) {
+		$text .= "The following kill(s) have been recorded in the last hour:\n";
+	} else { 
+		$text .= "KBbot is working properly. If you haven't already, setup your cron job now. I will pull new data after this point. \n";
+	}
 	my @ids;
 	foreach my $kill ( reverse(@{$data}) ) {
-		print Dumper $kill if $opt{'d'};
-		$text .= 'https://zkillboard.com/kill/' . $kill->{'killID'} . "\n";
-		$text .= 'Time: ' . $kill->{'killTime'} . "\n";
-		$text .= 'Victim: ' . $kill->{'victim'}->{'characterName'} . ' - ' . $kill->{'victim'}->{'corporationName'} . ' - ' . $kill->{'victim'}->{'allianceName'} . "\n";
-		$text .= 'Ship: ' . get_ship($kill->{'victim'}->{'shipTypeID'}) . "\n";
-		foreach my $attacker ( @{$kill->{'attackers'}} ) {
-			if ( $attacker->{'finalBlow'} ) {
-				$text .= 'Killing Blow: ' . $attacker->{'characterName'} . ' - ' . $attacker->{'corporationName'} . ' - ' . $kill->{'victim'}->{'allianceName'} . "\n";
-				last;
+		if ( $last_seen ) {
+			print Dumper $kill if $opt{'d'};
+			$text .= 'https://zkillboard.com/kill/' . $kill->{'killID'} . "\n";
+			$text .= 'Time: ' . $kill->{'killTime'} . "\n";
+			$text .= 'Victim: ' . $kill->{'victim'}->{'characterName'} . ' - ' . $kill->{'victim'}->{'corporationName'} . ' - ' . $kill->{'victim'}->{'allianceName'} . "\n";
+			$text .= 'Ship: ' . get_ship($kill->{'victim'}->{'shipTypeID'}) . "\n";
+			foreach my $attacker ( @{$kill->{'attackers'}} ) {
+				if ( $attacker->{'finalBlow'} ) {
+					$text .= 'Killing Blow: ' . $attacker->{'characterName'} . ' - ' . $attacker->{'corporationName'} . ' - ' . $kill->{'victim'}->{'allianceName'} . "\n";
+					last;
+				}
 			}
+			$text .= 'Value: ' . commify($kill->{'zkb'}->{'totalValue'}) . " ISK\n";
+			$text .= "\n\n";
 		}
-		$text .= 'Value: ' . commify($kill->{'zkb'}->{'totalValue'}) . " ISK\n";
-		$text .= "\n\n";
 		push(@ids, $kill->{'killID'});
 	}
 	if ( $#ids <= 0 ) {
