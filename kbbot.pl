@@ -151,7 +151,7 @@ sub get_ship {
         my $response = $ua->get('https://api.eveonline.com/eve/TypeName.xml.aspx?ids=' . $id);
 	print Dumper $response if $opt{'d'};
 	my $ship = $response->content();
-        my $ship = XMLin($response->content());
+        $ship = XMLin($response->content());
         return($ship->{'result'}->{'rowset'}->{'row'}->{'typeName'});
 }
 
@@ -173,7 +173,7 @@ sub get_config {
 		username => '^[a-zA-Z0-9\-\_]+$',
 		emoji => '^:[a-zA-Z0-9\-\_]+:$',
 	);
-	foreach my ( $key, $value ) ( each %validations ) {
+	while ( my ( $key, $value ) = each %validations ) {
 		if ( $conf{$key} !~ /$value/ ) {
 			die "$key does not have valid input: $key, $conf{$key}, $value\n";
 		}
