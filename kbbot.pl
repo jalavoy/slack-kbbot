@@ -74,6 +74,7 @@ sub get_kills {
 		print "No new kills found.\n" if $opt{'v'};
 		exit();
 	} else {
+		print "I got back $#{$response} results from zkb\n" if $opt{'v'};
 		return($response);
 	}
 }
