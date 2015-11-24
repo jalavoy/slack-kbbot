@@ -66,6 +66,7 @@ sub get_kills {
 		$uri = 'http://zkillboard.com/api/kills/' . $conf->{'kb_type'} . 'ID/' . $conf->{'target_id'} . '/';
 	}
 	my $response = $ua->get($uri, 'Accept-Encoding' => HTTP::Message::decodable);
+	die("Could not pull from zkillboard.\n") unless ( $response->is_success );	
 	$response = $response->decoded_content( charset => 'none', raise_error => 0 );
 	$response = decode_json($response);
 	print Dumper $response if $opt{'d'};
@@ -130,6 +131,11 @@ sub tell_slack {
 	$req->header( 'Content-Type' => 'application/json' );
 	$req->content($json);
 	my $response = $ua->request($req);
+	if ( $response->content() ne 'ok' ) {
+		print "Returned an error from Slack.\n";
+		print $response->status_line;
+		exit();
+	}
 	print Dumper $response if $opt{'d'};
 }
 
@@ -150,6 +156,10 @@ sub get_ship {
         $ua->agent($user_agent);
         my $response = $ua->get('https://api.eveonline.com/eve/TypeName.xml.aspx?ids=' . $id);
 	print Dumper $response if $opt{'d'};
+	if ( ! $response->is_success ) {
+		print "Could not pull ship type from EVE api.\n" if $opt{'v'};
+		return('Unknown');
+	}
 	my $ship = $response->content();
         $ship = XMLin($response->content());
         return($ship->{'result'}->{'rowset'}->{'row'}->{'typeName'});
