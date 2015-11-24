@@ -171,7 +171,7 @@ sub get_config {
 		slack_hook_url => '^http:\/\/hooks\.slack\.com\/services\/[0-0a-zA-Z]+\/[0-0a-zA-Z]+\/[0-0a-zA-Z]+$',
 		channel => '^(#)?[a-zA-Z0-9]+$',
 		username => '^[a-zA-Z0-9\-\_]+$',
-		emoji => '^:[a-zA-Z0-9\-\_]+$',
+		emoji => '^:[a-zA-Z0-9\-\_]+:$',
 	);
 	foreach my ( $key, $value ) ( each %validations ) {
 		if ( $conf{$key} !~ /$value/ ) {
