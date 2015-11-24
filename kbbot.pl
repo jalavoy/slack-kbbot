@@ -14,8 +14,8 @@ use Data::Dumper;
 
 ### START EDITS HERE
 my $kb_type = 'corporation'; # valid options = corporation or alliance
-my $target_id = 666; # you can get this from visiting your corps kill feed on zkillboard. It'll be the number in the URL, This is Goons for example: https://zkillboard.com/alliance/824518128/
-my $slack_hook_url = 'https://hooks.slack.com/services/some/slack/hook/url'; # slack hook url, you would get this from creating a new incoming webhook in slack
+my $target_id = 824518128; # you can get this from visiting your corp or alliances kill feed on zkillboard. It'll be the number in the URL, This is Goons for example: https://zkillboard.com/alliance/824518128/
+my $slack_hook_url = 'https://hooks.slack.com/services/some/slack/hook/url'; # slack hook url, you would get this from creating a new incoming webhook in slack. Go to Configure Integrations > Incoming WebHooks > Setup a hook and grab the Webhook URL
 my $channel = '#kb'; # the channel name you'd like to post to
 my $username = 'KBbot'; # the username you'd like the bot to use
 my $emoji = ':glitch_crab:'; # the emoji you want to use for your bots "buddy icon" in slack.
@@ -140,14 +140,6 @@ sub cleanup {
 	return();
 }
 
-sub commify {
-	my $input = shift;
-	($input) = split(/\./, $input);
-	$input = reverse($input);
-	$input =~ s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g;
-	return reverse($input);
-}
-
 sub get_ship {
 	my $id = shift;
 	my $ua = LWP::UserAgent->new();
@@ -155,6 +147,14 @@ sub get_ship {
         $ua->agent($user_agent);
         my $response = $ua->get('http://v3trae.net/eve/item_lookup.php?id=' . $id);
 	return($response->content());
+}
+
+sub commify {
+	my $input = shift;
+	($input) = split(/\./, $input);
+	$input = reverse($input);
+	$input =~ s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g;
+	return reverse($input);
 }
 
 
