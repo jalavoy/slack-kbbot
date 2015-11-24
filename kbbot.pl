@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 # this is a script that will pull killboard data from zkillboards API and feed it into a slack channel.
 # Setup a cronjob to run this once an hour on the host machine. You're most likely going to hit caching limitations on zkb's API anyway, so no real reason to make it run more often than that. Something like this:
 # 0 * * * * /path/to/script/kbbot.pl
@@ -12,16 +12,8 @@ use HTTP::Message;
 use JSON::XS;
 use Data::Dumper;
 
-### START EDITS HERE
-my $kb_type = 'corporation'; # valid options = corporation or alliance
-my $target_id = 824518128; # you can get this from visiting your corp or alliances kill feed on zkillboard. It'll be the number in the URL, This is Goons for example: https://zkillboard.com/alliance/824518128/
-my $slack_hook_url = 'https://hooks.slack.com/services/some/slack/hook/url'; # slack hook url, you would get this from creating a new incoming webhook in slack. Go to Configure Integrations > Incoming WebHooks > Setup a hook and grab the Webhook URL
-my $channel = '#kb'; # the channel name you'd like to post to
-my $username = 'KBbot'; # the username you'd like the bot to use
-my $emoji = ':glitch_crab:'; # the emoji you want to use for your bots "buddy icon" in slack.
-### STOP EDITS HERE
-
 my $last_file = $FindBin::RealBin . '/.lastkill';
+my $conf_file = $FindBin::RealBin . '/.kbbot.conf';
 my $user_agent = 'Slack KBbot v1.0 - https://github.com/jalavoy/slack-kbbot';
 my $ua = LWP::UserAgent->new();
 $ua->timeout(10);
@@ -34,6 +26,8 @@ if ( $opt{'h'} ) {
 	print "[!] Usage: $0 [-v] [-d]\n";
 	exit();
 }
+
+my $conf = get_config();
 
 main();
 
@@ -66,9 +60,9 @@ sub get_kills {
 	my $last_seen = shift;
 	my $uri;
 	if ( $last_seen ) {
-		$uri = 'http://zkillboard.com/api/kills/' . $kb_type . 'ID/' . $target_id . '/afterKillID/' . $last_seen . '/';
+		$uri = 'http://zkillboard.com/api/kills/' . $conf->{'kb_type'} . 'ID/' . $conf->{'target_id'} . '/afterKillID/' . $last_seen . '/';
 	} else {
-		$uri = 'http://zkillboard.com/api/kills/' . $kb_type . 'ID/' . $target_id . '/';
+		$uri = 'http://zkillboard.com/api/kills/' . $conf->{'kb_type'} . 'ID/' . $conf->{'target_id'} . '/';
 	}
 	my $response = $ua->get($uri, 'Accept-Encoding' => HTTP::Message::decodable);
 	$response = $response->decoded_content( charset => 'none', raise_error => 0 );
@@ -116,14 +110,14 @@ sub tell_slack {
 
 	print "Sending data to Slack\n" if $opt{'v'};
 	my $payload = {
-		channel => $channel,
-		username => $username,
-		icon_emoji => $emoji,
+		channel => $conf->{'channel'},
+		username => $conf->{'username'},
+		icon_emoji => $conf->{'emoji'},
 		text => $text
 	};
 
 	my $json = encode_json($payload);
-	my $req = HTTP::Request->new( 'POST', $slack_hook_url );
+	my $req = HTTP::Request->new( 'POST', $conf->{'slack_hook_url'} );
 	$req->header( 'Content-Type' => 'application/json' );
 	$req->content($json);
 	my $response = $ua->request($req);
@@ -147,6 +141,19 @@ sub get_ship {
         $ua->agent($user_agent);
         my $response = $ua->get('http://v3trae.net/eve/item_lookup.php?id=' . $id);
 	return($response->content());
+}
+
+sub get_config {
+	my %conf;
+	open(my $DAT, '<', $conf_file);
+		while(<$DAT>) {
+			next if ( /^#/ );
+			if ( /^(.*)=(.*)$/ ) {
+				$conf{$1} = $2;
+			}
+		}
+	close($DAT);
+	return(\%conf);
 }
 
 sub commify {
