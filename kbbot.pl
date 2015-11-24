@@ -84,7 +84,7 @@ sub generate {
 	if ( $last_seen ) {
 		$text .= "The following kill(s) have been recorded in the last hour:\n";
 	} else { 
-		$text .= "KBbot is working properly. If you haven't already, setup your cron job now. I will pull new data after this point. \n";
+		$text .= "Hi there! I am working properly. If you haven't already, setup your cron job now. I will pull new data after this point. \n";
 	}
 	my @ids;
 	foreach my $kill ( reverse(@{$data}) ) {
