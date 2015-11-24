@@ -10,6 +10,7 @@ use Getopt::Std qw(getopts);
 use LWP::UserAgent;
 use HTTP::Message;
 use JSON::XS;
+use XML::Simple;
 use Data::Dumper;
 
 my $last_file = $FindBin::RealBin . '/.lastkill';
@@ -147,8 +148,11 @@ sub get_ship {
 	my $ua = LWP::UserAgent->new();
         $ua->timeout(10);
         $ua->agent($user_agent);
-        my $response = $ua->get('http://v3trae.net/eve/item_lookup.php?id=' . $id);
-	return($response->content());
+        my $response = $ua->get('https://api.eveonline.com/eve/TypeName.xml.aspx?ids=' . $id);
+	print Dumper $response if $opt{'d'};
+	my $ship = $response->content();
+        my $ship = XMLin($response->content());
+        return($ship->{'result'}->{'rowset'}->{'row'}->{'typeName'});
 }
 
 sub get_config {
