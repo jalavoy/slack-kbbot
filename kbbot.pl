@@ -165,6 +165,19 @@ sub get_config {
 			}
 		}
 	close($DAT);
+	my %validations = (
+		target_id => '^[0-9]+$',
+		kb_type => '^(corporation|alliance)$',
+		slack_hook_url => '^http:\/\/hooks\.slack\.com\/services\/[0-0a-zA-Z]+\/[0-0a-zA-Z]+\/[0-0a-zA-Z]+$',
+		channel => '^(#)?[a-zA-Z0-9]+$',
+		username => '^[a-zA-Z0-9\-\_]+$',
+		emoji => '^:[a-zA-Z0-9\-\_]+$',
+	);
+	foreach my ( $key, $value ) ( each %validations ) {
+		if ( $conf{$key} !~ /$value/ ) {
+			die "$key does not have valid input: $key, $conf{$key}, $value\n";
+		}
+	}
 	return(\%conf);
 }
 
