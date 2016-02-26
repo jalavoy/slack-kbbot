@@ -66,6 +66,7 @@ sub get_kills {
 		$uri = 'http://zkillboard.com/api/kills/' . $conf->{'kb_type'} . 'ID/' . $conf->{'target_id'} . '/';
 	}
 	my $response = $ua->get($uri, 'Accept-Encoding' => HTTP::Message::decodable);
+	print Dumper $response if $opt{'d'};
 	die("Could not pull from zkillboard.\n") unless ( $response->is_success );	
 	$response = $response->decoded_content( charset => 'none', raise_error => 0 );
 	$response = decode_json($response);
