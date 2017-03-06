@@ -1,6 +1,9 @@
 # KBbot
 **THIS NO LONGER WORKS - ZKB NO LONGER SUPPORTS MY METHOD AND I DO NOT HAVE TIME TO REWORK IT. I SUGGEST USING THS FOLLOWING CODE INSTEAD. IT'S A NICER PACKAGE ANYWAY**
+
 `https://github.com/dimurgos/Slack-Eve-Killmail`
+
+
 
 Parses zkillboard to give an hour by hour feed of kills by a corporation or alliance.
 
